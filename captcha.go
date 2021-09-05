@@ -148,8 +148,8 @@ func (c *Captcha) drawNoises(img *Image) {
 		x := ra.Intn(size.X)
 		y := ra.Intn(size.Y)
 		r := ra.Intn(size.Y/20) + 1
-		colorindex := ra.Intn(len(c.frontColors))
-		img.DrawCircle(x, y, r, i%4 != 0, c.frontColors[colorindex])
+		colorIndex := ra.Intn(len(c.frontColors))
+		img.DrawCircle(x, y, r, i%4 != 0, c.frontColors[colorIndex])
 	}
 
 	// 绘制干扰线
@@ -159,15 +159,15 @@ func (c *Captcha) drawNoises(img *Image) {
 		o := int(math.Pow(-1, float64(i)))
 		w := ra.Intn(size.Y) * o
 		h := ra.Intn(size.Y/10) * o
-		colorindex := ra.Intn(len(c.frontColors))
-		img.DrawLine(x, y, x+w, y+h, c.frontColors[colorindex])
-		colorindex++
+		colorIndex := ra.Intn(len(c.frontColors))
+		img.DrawLine(x, y, x+w, y+h, c.frontColors[colorIndex])
+		colorIndex++
 	}
 
 }
 
 // 绘制文字
-func (c *Captcha) drawString(img *Image, str string) {
+func (c *Captcha) drawString(img *Image, str string) (err error){
 
 	if c.fonts == nil {
 		panic("没有设置任何字体")
@@ -195,7 +195,10 @@ func (c *Captcha) drawString(img *Image, str string) {
 
 		//随机取一个字体
 		font := c.randFont()
-		str.DrawString(font, c.frontColors[colorindex], string(char), float64(fsize))
+		err = str.DrawString(font, c.frontColors[colorindex], string(char), float64(fsize))
+		if err != nil {
+			return err
+		}
 
 		// 转换角度后的文字图形
 		rs := str.Rotate(float64(r.Intn(40) - 20))

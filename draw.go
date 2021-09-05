@@ -100,7 +100,7 @@ func (img *Image) DrawCircle(xc, yc, r int, fill bool, c color.Color) {
 }
 
 // DrawString 写字
-func (img *Image) DrawString(font *truetype.Font, c color.Color, str string, fontsize float64) {
+func (img *Image) DrawString(font *truetype.Font, c color.Color, str string, fontsize float64) (err error) {
 	ctx := freetype.NewContext()
 	// default 72dpi
 	ctx.SetDst(img)
@@ -110,7 +110,8 @@ func (img *Image) DrawString(font *truetype.Font, c color.Color, str string, fon
 	ctx.SetFont(font)
 	// 写入文字的位置
 	pt := freetype.Pt(0, int(-fontsize/6)+ctx.PointToFixed(fontsize).Ceil())
-	ctx.DrawString(str, pt)
+	_, err = ctx.DrawString(str, pt)
+	return
 }
 
 // Rotate 旋转
