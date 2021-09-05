@@ -5,7 +5,7 @@ import (
 	"image/png"
 	"net/http"
 
-	"github.com/afocus/captcha"
+	"github.com/wsqun/captcha"
 )
 
 var cap *captcha.Captcha
@@ -14,9 +14,10 @@ func main() {
 
 	cap = captcha.New()
 
-	if err := cap.SetFont("comic.ttf"); err != nil {
+	if err := cap.SetFont("/Users/shaoqunwang/takeIn/code/go/release/captcha/examples/comic.ttf"); err != nil {
 		panic(err.Error())
 	}
+
 
 	/*
 	   //We can load font not only from localfile, but also from any []byte slice

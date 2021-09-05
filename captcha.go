@@ -17,19 +17,10 @@ type Captcha struct {
 	frontColors []color.Color
 	bkgColors   []color.Color
 	disturlvl   DisturLevel
+	charNum     int
 	fonts       []*truetype.Font
 	size        image.Point
 }
-
-type StrType int
-
-const (
-	NUM   StrType = iota // 数字
-	LOWER                // 小写字母
-	UPPER                // 大写字母
-	ALL                  // 全部
-	CLEAR                // 去除部分易混淆的字符
-)
 
 type DisturLevel int
 
@@ -42,22 +33,27 @@ const (
 func New() *Captcha {
 	c := &Captcha{
 		disturlvl: NORMAL,
-		size:      image.Point{82, 32},
+		size:      image.Point{X:82, Y:32},
+		charNum:   4,
 	}
 	c.frontColors = []color.Color{color.Black}
 	c.bkgColors = []color.Color{color.White}
 	return c
 }
 
+func (c *Captcha) AddFonts(fonts []*truetype.Font) {
+	c.fonts = fonts
+}
+
 // AddFont 添加一个字体
-func (c *Captcha) AddFont(path string) error {
-	fontdata, erro := ioutil.ReadFile(path)
-	if erro != nil {
-		return erro
+func (c *Captcha) AddFont(path string) (err error) {
+	fontdata, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
 	}
-	font, erro := freetype.ParseFont(fontdata)
-	if erro != nil {
-		return erro
+	font, err := freetype.ParseFont(fontdata)
+	if err != nil {
+		return err
 	}
 	if c.fonts == nil {
 		c.fonts = []*truetype.Font{}
@@ -92,6 +88,12 @@ func (c *Captcha) SetFont(paths ...string) error {
 func (c *Captcha) SetDisturbance(d DisturLevel) {
 	if d > 0 {
 		c.disturlvl = d
+	}
+}
+
+func (c *Captcha) SetCharNum(charNum int) {
+	if charNum > 0 {
+		c.charNum = charNum
 	}
 }
 
@@ -167,7 +169,7 @@ func (c *Captcha) drawNoises(img *Image) {
 }
 
 // 绘制文字
-func (c *Captcha) drawString(img *Image, str string) (err error){
+func (c *Captcha) drawString(img *Image, str string) (err error) {
 
 	if c.fonts == nil {
 		panic("没有设置任何字体")
@@ -215,55 +217,44 @@ func (c *Captcha) drawString(img *Image, str string) (err error){
 	}
 
 	draw.Draw(img, tmp.Bounds(), tmp, image.ZP, draw.Over)
+	return nil
 }
 
 // Create 生成一个验证码图片
-func (c *Captcha) Create(num int, t StrType) (*Image, string) {
+func (c *Captcha) Create(num int) (dst *Image, str string, err error) {
 	if num <= 0 {
 		num = 4
 	}
-	dst := NewImage(c.size.X, c.size.Y)
-	//tmp := NewImage(c.size.X, c.size.Y)
+	dst = NewImage(c.size.X, c.size.Y)
 	c.drawBkg(dst)
 	c.drawNoises(dst)
 
-	str := string(c.randStr(num, int(t)))
-	c.drawString(dst, str)
-	//c.drawString(tmp, str)
+	str = c.randStr(num)
+	err = c.drawString(dst, str)
 
-	return dst, str
+	return
 }
 
-func (c *Captcha) CreateCustom(str string) *Image {
+func (c *Captcha) CreateCustom(str string) (dst *Image, err error) {
 	if len(str) == 0 {
 		str = "unkown"
 	}
-	dst := NewImage(c.size.X, c.size.Y)
+	dst = NewImage(c.size.X, c.size.Y)
 	c.drawBkg(dst)
 	c.drawNoises(dst)
-	c.drawString(dst, str)
-	return dst
+	err = c.drawString(dst, str)
+	return
 }
 
-var fontKinds = [][]int{[]int{10, 48}, []int{26, 97}, []int{26, 65}}
-var letters = []byte("34578acdefghjkmnpqstwxyABCDEFGHJKMNPQRSVWXY")
+var letters = []string{"3", "4", "5", "7", "8", "a", "c", "d", "e", "f", "g", "h", "j", "k", "m", "n", "p", "q", "s", "t", "w", "x", "y", "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "M", "N", "P", "Q", "R", "S", "V", "W", "X", "Y"}
 
 // 生成随机字符串
 // size 个数 kind 模式
-func (c *Captcha) randStr(size int, kind int) []byte {
-	ikind, result := kind, make([]byte, size)
-	isAll := kind > 2 || kind < 0
+func (c *Captcha) randStr(size int) (res string) {
+
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < size; i++ {
-		if isAll {
-			ikind = rand.Intn(3)
-		}
-		scope, base := fontKinds[ikind][0], fontKinds[ikind][1]
-		result[i] = uint8(base + rand.Intn(scope))
-		// 不易混淆字符模式：重新生成字符
-		if kind == 4 {
-			result[i] = letters[rand.Intn(len(letters))]
-		}
+		res = res + letters[rand.Intn(len(letters))]
 	}
-	return result
+	return res
 }
