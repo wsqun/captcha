@@ -14,7 +14,7 @@ func main() {
 	cap := captcha.New()
 
 	dir, _ := os.Getwd()
-	if err := cap.SetFont(dir + "/examples/comic.ttf"); err != nil {
+	if err := cap.SetFont(dir + "/comic.ttf"); err != nil {
 		panic(err.Error())
 	}
 
