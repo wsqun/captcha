@@ -124,7 +124,7 @@ func (s *Service) resetImgOnline() {
 				s.poolBuffer.Put(online[i])
 			}
 			online = online[0:0]
-			s.picOffLine = s.picOffLine[0:0]
+			s.picOffLine = online
 		}
 	}
 }
