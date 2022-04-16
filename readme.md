@@ -26,7 +26,7 @@ go get github.com/wsqun/captcha
 
 look `examples/main.go`
 
-fork from github.com/afocus/captcha
+fork from github.com/afocus/captcha 进行并发优化
 
 
 
