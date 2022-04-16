@@ -7,6 +7,7 @@ RUN  go mod download -x
 
 COPY . .
 RUN make build
+#RUN make buildCompare
 
 FROM alpine:3.9.5 as captcha
 WORKDIR /app

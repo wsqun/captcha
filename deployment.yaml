@@ -15,7 +15,14 @@ spec:
     spec:
       containers:
         - name: captcha
-          image: wsqun/svc-captcha:1.0.0
+          image: wsqun/svc-captcha:1.0.1
+          resources: # 资源配额
+            limits:  # 限制资源（上限）
+              cpu: "2" # CPU限制，单位是core数
+              memory: "100Mi" # 内存限制
+            requests: # 请求资源（下限）
+              cpu: "1"  # CPU限制，单位是core数
+              memory: "10Mi"  # 内存限制
         ports:
           - containerPort: 8085
 ---
